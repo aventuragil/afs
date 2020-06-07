@@ -65,8 +65,8 @@ public class VenusFile {
     }
 
     private RandomAccessFile copiarDeCache(Venus venus, String fileName, String mode) throws IOException, RemoteException, FileNotFoundException{
-        RandomAccessFile fichero = new RandomAccessFile(cacheDir + fileName, "rw");
         ViceReader viceReader = venus.getsrvVice().download(fileName, mode);
+        RandomAccessFile fichero = new RandomAccessFile(cacheDir + fileName, "rw");
         int blockSize = Integer.parseInt(venus.getTam());
         byte[] buf;
         while ((buf = viceReader.read(blockSize)) != null) {
@@ -75,6 +75,7 @@ public class VenusFile {
         fichero.close();
         viceReader.close();
         return new RandomAccessFile(cacheDir + fileName, mode);
+        
     }
 
     private boolean existeEnCache(String filename) {
