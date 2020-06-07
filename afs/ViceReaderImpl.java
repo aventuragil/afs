@@ -23,6 +23,12 @@ public class ViceReaderImpl extends UnicastRemoteObject implements ViceReader {
         int bytesRead = file.read(dest);
         if (bytesRead == -1) {
             return null;
+        } else if(bytesRead < tam) {
+            byte [] dest2 = new byte[bytesRead];
+            for(int i=0;i<bytesRead;i++){
+                dest2[i]=dest[i];
+            }
+            return dest2;
         }
         return dest;
     }

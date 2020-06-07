@@ -17,23 +17,18 @@ public class VenusFile {
         this.mode = mode;
         this.fileName = fileName;
         if (mode.equals("rw")) {
-            this.mode = mode;
             if (existeEnCache(fileName)) {
                 file = new RandomAccessFile(cacheDir + fileName, mode);
             } else {
-                file = new RandomAccessFile(cacheDir + fileName, "rw");
-                ViceReader viceReader = venus.getsrvVice().download(fileName, mode);
-                int blockSize = Integer.parseInt(venus.getTam());
-                byte[] buf;
-                while ((buf = viceReader.read(blockSize)) != null) {
-                    file.write(buf);
-                }
-                file.close();
-                viceReader.close();
-                file = new RandomAccessFile(cacheDir + fileName, mode);
+                file = copiarDeCache(venus, fileName, mode);
             }
         } else if (mode.equals("r")) {
-            file = new RandomAccessFile(cacheDir + fileName, mode);
+            try {
+                file = new RandomAccessFile(cacheDir + fileName, mode);    
+            } catch (FileNotFoundException e) {
+                file = copiarDeCache(venus, fileName, mode);
+            }
+            
         }
 
     }
@@ -67,6 +62,19 @@ public class VenusFile {
             viceWriter.close();
         }
         file.close();
+    }
+
+    private RandomAccessFile copiarDeCache(Venus venus, String fileName, String mode) throws IOException, RemoteException, FileNotFoundException{
+        RandomAccessFile fichero = new RandomAccessFile(cacheDir + fileName, "rw");
+        ViceReader viceReader = venus.getsrvVice().download(fileName, mode);
+        int blockSize = Integer.parseInt(venus.getTam());
+        byte[] buf;
+        while ((buf = viceReader.read(blockSize)) != null) {
+            fichero.write(buf);
+        }
+        fichero.close();
+        viceReader.close();
+        return new RandomAccessFile(cacheDir + fileName, mode);
     }
 
     private boolean existeEnCache(String filename) {
