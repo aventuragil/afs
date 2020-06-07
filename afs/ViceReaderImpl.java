@@ -2,8 +2,7 @@
 // para completar la descarga de un fichero
 package afs;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.rmi.*;
 import java.rmi.server.*;
 
@@ -23,7 +22,7 @@ public class ViceReaderImpl extends UnicastRemoteObject implements ViceReader {
         byte[] dest = new byte[tam];
         int offset = 0;
         int length = tam;
-        int bytesRead = randomAccessFile.read(dest, offset, length);
+        int bytesRead = file.read(dest, offset, length);
         return dest;
     }
 

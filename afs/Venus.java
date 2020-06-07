@@ -1,7 +1,8 @@
 // Clase de cliente que inicia la interacción con el servicio de
 // ficheros remotos
 package afs;
-import java.rmi.*; 
+
+import java.rmi.*;
 
 public class Venus {
     private String tam;
@@ -12,10 +13,10 @@ public class Venus {
             String puerto = System.getenv("REGISTRY_PORT");
             String host = System.getenv("REGISTRY_HOST");
             this.tam = System.getenv("BLOCKSIZE");
-            this.srvVice = (Vice) Naming.lookup("//" + host + ":" + puerto + "/afs");
-
+            this.srvVice = (Vice) Naming.lookup("//" + host + ":" + puerto + "/AFS");
+        } catch (RemoteException e) {
+            System.err.println("Error de comunicacion: " + e.toString());
         } catch (Exception e) {
-            System.err.println("Excepcion en ClienteEco:");
             e.printStackTrace();
         }
     }
@@ -24,10 +25,8 @@ public class Venus {
         return this.tam;
     }
 
-    public Vice getsrvVice () {
+    public Vice getsrvVice() {
         return this.srvVice;
     }
-
-    
 }
 

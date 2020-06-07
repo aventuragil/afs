@@ -2,7 +2,7 @@
 // para iniciar la carga y descarga de ficheros
 package afs;
 
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.rmi.*;
 import java.rmi.server.*;
 
@@ -16,10 +16,13 @@ public class ViceImpl extends UnicastRemoteObject implements Vice {
     }
 
     public ViceReader download(String fileName, String mode) throws RemoteException, FileNotFoundException {
-        return new ViceReaderImp(fileName, mode);
+        ViceReader vr = new ViceReaderImpl(fileName, mode);
+        return vr;
     }
 
-    public ViceWriter upload(String fileName, String mode) throws RemoteException {
-        return new ViceWriterImpl(fileName, mode);
+    public ViceWriter upload(String fileName, String mode) throws RemoteException, FileNotFoundException {
+        //ViceWriter vw = new ViceWriterImpl(fileName, mode);
+        //return vw;
+        return null;
     }
 }
