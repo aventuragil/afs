@@ -16,6 +16,7 @@ public class VenusFile {
     public VenusFile(Venus venus, String fileName, String mode) throws RemoteException, IOException, FileNotFoundException {
         this.mode = mode;
         this.fileName = fileName;
+        this.venus = venus;
         if (mode.equals("rw")) {
             if (existeEnCache(fileName)) {
                 file = new RandomAccessFile(cacheDir + fileName, mode);
@@ -51,12 +52,22 @@ public class VenusFile {
 
     public void close() throws RemoteException, IOException {
         if (this.mode.equals("rw")) {
-            ViceWriter viceWriter = venus.getsrvVice().upload(this.fileName, this.mode);
             int blockSize = Integer.parseInt(venus.getTam());
             long tam = file.length();
             byte[] buf = new byte[blockSize];
+            file.seek(0);
+            ViceWriter viceWriter = venus.getsrvVice().upload(this.fileName, this.mode);
             for (long t = 0; t < tam; t += blockSize) {
-                file.read(buf, (int)t, blockSize);
+                int bytesRead = file.read(buf, (int)t, blockSize);
+                if (bytesRead < tam) {
+                    byte [] dest2 = new byte[bytesRead];
+                    for(int i=0;i<bytesRead;i++){
+                        dest2[i]=buf[i];
+                    }
+                    viceWriter.write(dest2);
+                } else if(bytesRead < tam) {
+                    viceWriter.write(buf);
+                }
                 viceWriter.write(buf);
             }
             viceWriter.close();
