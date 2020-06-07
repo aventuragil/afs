@@ -13,23 +13,27 @@ public class VenusFile {
     public String mode;
 
 
-    public VenusFile(Venus venus, String fileName, String mode) throws RemoteException, IOException {
-        try {
-            file = new RandomAccessFile(cacheDir+fileName, mode);
-        } catch (FileNotFoundException e) {
-            file = new RandomAccessFile(cacheDir+fileName, "rw");
-            ViceReader vice = venus.getsrvVice().download(fileName, mode);
-            int tam = Integer.parseInt(venus.getTam());
-            byte[] buf;
-            while ((buf = vice.read(tam)) != null) {
-                file.write(buf);
+    public VenusFile(Venus venus, String fileName, String mode) throws RemoteException, IOException, FileNotFoundException {
+        if (mode.equals("rw")) {
+            if (existeEnCache(fileName)) {
+                file = new RandomAccessFile(cacheDir+fileName, mode);
+            } else {
+                file = new RandomAccessFile(cacheDir+fileName, "rw");
+                ViceReader vice = venus.getsrvVice().download(fileName, mode);
+                int tam = Integer.parseInt(venus.getTam());
+                byte[] buf;
+                while ((buf = vice.read(tam)) != null) {
+                    file.write(buf);
+                }
+                file.close();
+                vice.close();
+                file = new RandomAccessFile(cacheDir+fileName, mode);
             }
-            file.close();
-            vice.close();
+        } else if (mode.equals("r")) {
+            System.out.println("mode r");
             file = new RandomAccessFile(cacheDir+fileName, mode);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        
     }
     public int read(byte[] b) throws RemoteException, IOException {
         return file.read(b);

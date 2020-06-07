@@ -20,9 +20,10 @@ public class ViceReaderImpl extends UnicastRemoteObject implements ViceReader {
 
     public byte[] read(int tam) throws RemoteException, IOException {
         byte[] dest = new byte[tam];
-        int offset = 0;
-        int length = tam;
-        int bytesRead = file.read(dest, offset, length);
+        int bytesRead = file.read(dest);
+        if (bytesRead == -1) {
+            return null;
+        }
         return dest;
     }
 
