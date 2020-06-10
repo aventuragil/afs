@@ -11,6 +11,7 @@ public class VenusFile {
     public Venus venus;
     public String fileName;
     public String mode;
+    public boolean written;
 
 
     public VenusFile(Venus venus, String fileName, String mode) throws RemoteException, IOException, FileNotFoundException {
@@ -39,6 +40,7 @@ public class VenusFile {
     }
 
     public void write(byte[] b) throws RemoteException, IOException {
+        written = true;
         file.write(b);
     }
 
@@ -52,25 +54,26 @@ public class VenusFile {
 
     public void close() throws RemoteException, IOException {
         if (this.mode.equals("rw")) {
-            int blockSize = Integer.parseInt(venus.getTam());
-            long tam = file.length();
-            byte[] buf = new byte[blockSize];
-            file.seek(0);
-            ViceWriter viceWriter = venus.getsrvVice().upload(this.fileName, this.mode);
-            for (long t = 0; t < tam; t += blockSize) {
-                int bytesRead = file.read(buf, (int)t, blockSize);
-                if (bytesRead < tam) {
-                    byte [] dest2 = new byte[bytesRead];
-                    for(int i=0;i<bytesRead;i++){
-                        dest2[i]=buf[i];
+            if (this.written) {
+                int blockSize = Integer.parseInt(venus.getTam());
+                long tam = file.length();
+                byte[] buf = new byte[blockSize];
+                file.seek(0);
+                ViceWriter viceWriter = venus.getsrvVice().upload(this.fileName, this.mode);
+                for (long t = 0; t < tam; t += blockSize) {
+                    int bytesRead = file.read(buf, (int)t, blockSize);
+                    if (bytesRead < tam) {
+                        byte [] dest2 = new byte[bytesRead];
+                        for(int i=0;i<bytesRead;i++){
+                            dest2[i]=buf[i];
+                        }
+                        viceWriter.write(dest2);
+                    } else {
+                        viceWriter.write(buf);
                     }
-                    viceWriter.write(dest2);
-                } else if(bytesRead < tam) {
-                    viceWriter.write(buf);
                 }
-                viceWriter.write(buf);
+                viceWriter.close();
             }
-            viceWriter.close();
         }
         file.close();
     }
