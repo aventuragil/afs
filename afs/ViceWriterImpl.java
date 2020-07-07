@@ -17,6 +17,11 @@ public class ViceWriterImpl extends UnicastRemoteObject implements ViceWriter {
     public ViceWriterImpl(String fileName, String mode) throws RemoteException, FileNotFoundException {
         file = new RandomAccessFile(AFSDir + fileName, mode);
     }
+
+    public void setLength(long l) throws RemoteException, IOException {
+        file.setLength(l);
+    }
+
     public void write(byte [] b) throws RemoteException, IOException {
         file.write(b);
     }
