@@ -54,12 +54,12 @@ public class VenusFile {
 
     public void close() throws RemoteException, IOException {
         if (this.mode.equals("rw")) {
+            ViceWriter viceWriter = venus.getsrvVice().upload(this.fileName, this.mode);
             if (this.written) {
                 int blockSize = Integer.parseInt(venus.getTam());
                 long tam = file.length();
                 byte[] buf = new byte[blockSize];
                 file.seek(0);
-                ViceWriter viceWriter = venus.getsrvVice().upload(this.fileName, this.mode);
                 for (long t = 0; t < tam; t += blockSize) {
                     int bytesRead = file.read(buf, (int)t, blockSize);
                     if (bytesRead < tam) {
@@ -72,8 +72,9 @@ public class VenusFile {
                         viceWriter.write(buf);
                     }
                 }
-                viceWriter.close();
             }
+            viceWriter.setLength(file.length());
+            viceWriter.close();
         }
         file.close();
     }
