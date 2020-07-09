@@ -12,6 +12,7 @@ public class VenusFile {
     public String fileName;
     public String mode;
     public boolean written;
+    public boolean size;
 
 
     public VenusFile(Venus venus, String fileName, String mode) throws RemoteException, IOException, FileNotFoundException {
@@ -49,20 +50,20 @@ public class VenusFile {
     }
 
     public void setLength(long l) throws RemoteException, IOException {
+        size = true;
         file.setLength(l);
     }
 
     public void close() throws RemoteException, IOException {
         if (this.mode.equals("rw")) {
-            ViceWriter viceWriter = venus.getsrvVice().upload(this.fileName, this.mode);
             if (this.written) {
+                ViceWriter viceWriter = venus.getsrvVice().upload(this.fileName, this.mode);
                 int blockSize = Integer.parseInt(venus.getTam());
-                long tam = file.length();
                 byte[] buf = new byte[blockSize];
                 file.seek(0);
-                for (long t = 0; t < tam; t += blockSize) {
-                    int bytesRead = file.read(buf, (int)t, blockSize);
-                    if (bytesRead < tam) {
+                int bytesRead = 0;
+                while((bytesRead = file.read(buf)) != -1) {
+                    if (bytesRead < blockSize) {
                         byte [] dest2 = new byte[bytesRead];
                         for(int i=0;i<bytesRead;i++){
                             dest2[i]=buf[i];
@@ -72,9 +73,15 @@ public class VenusFile {
                         viceWriter.write(buf);
                     }
                 }
+                if (this.size) {
+                    viceWriter.setLength(file.length());
+                }
+                viceWriter.close();
+            } else if (this.size) {
+                ViceWriter viceWriter = venus.getsrvVice().upload(this.fileName, this.mode);
+                viceWriter.setLength(file.length());
+                viceWriter.close();
             }
-            viceWriter.setLength(file.length());
-            viceWriter.close();
         }
         file.close();
     }
